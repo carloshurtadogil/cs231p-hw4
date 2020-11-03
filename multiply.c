@@ -7,6 +7,8 @@ typedef struct { //example structure
     int e_g;
 } Example_Structure;
 
+double dot_product(Mat*, Mat*, int);
+
 static void example_helper_function(int n){
     // Functions defined with the modifier 'static' are only visible
     // to other functions in this file. They cannot be called from
@@ -35,4 +37,23 @@ void mat_multiply(Mat *A, Mat *B, Mat *C, unsigned int threads){
     //after doing the multiplication.
     //example_helper_function(1000);
     return;
+}
+
+/**
+ ** Calculate and return the dot product of two pointer arrays
+ ** 
+ ** @param X Pointer array
+ ** @param Y Pointer array
+ ** @param n Size of both arrays
+ ** @return The dot product of X and Y
+ **/
+double dot_product(Mat *X, Mat *Y, int n) {
+    double product = 0.0;
+
+    // product = product + X[i] + Y[i]
+    for (int i = 0; i < n; i++) {
+        product = product + *(X->ptr + i) * *(Y->ptr + i);
+    }
+
+    return product;
 }
