@@ -37,6 +37,9 @@ void mat_multiply(Mat *A, Mat *B, Mat *C, unsigned int threads){
     //after doing the multiplication.
     //example_helper_function(1000);
     int n = A->n;
+    C->n = n;
+    C->m = A->m;
+    //printf("%d %d\n", C->n, C->m);
     int product;
     for (int i = 0; i < n; i++) {
         //printf("i = %d\n", i);
