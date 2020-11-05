@@ -7,8 +7,6 @@ typedef struct {
     int row;
 } Matrices;
 
-#define BATCH_SIZE 1
-
 /* GLOBAL VARIABLES */
 unsigned int current_row, max_row;
 pthread_mutex_t lock;
@@ -25,7 +23,7 @@ void* multiply(void* arg)
     int curr_i = current_index++; 
 
     int product;
-    
+
     pthread_mutex_lock(&lock);
     for (int i = curr_i; i < (curr_i + 1); i++)  
         for (int j = 0; j < N; j++)  
