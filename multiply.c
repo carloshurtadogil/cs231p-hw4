@@ -7,26 +7,35 @@ typedef struct {
     int row;
 } Matrices;
 
+#define BATCH_SIZE 1
+
 /* GLOBAL VARIABLES */
+unsigned int current_row, max_row;
 pthread_mutex_t lock;
 int N;
+int current_index = 0;
 
-void *dot_product(void* arg) {
+
+void* multiply(void* arg) 
+{ 
     Matrices *matrices = (Matrices *) arg;
     Mat *A = matrices->X;
     Mat *B = matrices->Y;
     Mat *C = matrices->Z;
-    int i = matrices->row;
-    printf("i = %d\n", i); // i is returning only 2
+    int curr_i = current_index++; 
 
-    /*int product;
-    for (int j = 0; j < N; j++) 
-            for (int k = 0; k < N; k++) {
-                product = A->ptr[i*N + k] * B->ptr[k*N + j];
-                C->ptr[i*N + j] = C->ptr[i*N + j] + product;
-            }*/
+    int product;
+    
+    pthread_mutex_lock(&lock);
+    for (int i = curr_i; i < (curr_i + 1); i++)  
+        for (int j = 0; j < N; j++)  
+            for (int k = 0; k < N; k++)  {
+                product = A->ptr[i*N +k] * B->ptr[k*N + j];
+                C->ptr[i*N + j] += product;
+            }
+    pthread_mutex_unlock(&lock);
     return NULL;
-}
+} 
 
 void mat_multiply(Mat *A, Mat *B, Mat *C, unsigned int threads){
 
@@ -49,8 +58,7 @@ void mat_multiply(Mat *A, Mat *B, Mat *C, unsigned int threads){
     for (int i = 0; i < N; i++) {
         matrices.row = i;
 
-        printf("Calling\n");
-        if (pthread_create(&thread_arr[i], NULL, &dot_product, (void *) &matrices) != 0)
+        if (pthread_create(&thread_arr[i], NULL, &multiply, (void *) &matrices) != 0)
             pthread_exit((void *)1);
     }
         
