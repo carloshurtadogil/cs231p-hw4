@@ -10,10 +10,10 @@ typedef struct {
 #define BATCH_SIZE 64 
 
 /* GLOBAL VARIABLES */
-unsigned int current_row, max_row;
 pthread_mutex_t lock;
 int N;
-int current_index = 0;
+unsigned int max_row;
+unsigned int current_row = 0;
 
 
 /**
@@ -27,12 +27,13 @@ void  multiply(Matrices *matrices, unsigned int curr_row) {
     Mat *A = matrices->X;
     Mat *B = matrices->Y;
     Mat *C = matrices->Z;
+
     int product;
     for (int i = curr_row; i < (curr_row + 1); i++) // current row
         for (int j = 0; j < N; j++)  
             for (int k = 0; k < N; k++)  {
-                product = A->ptr[i*N +k] * B->ptr[k*N + j];
-                C->ptr[i*N + j] += product;
+                product = A->ptr[i*N +k] * B->ptr[k*N + j]; // calculate product
+                C->ptr[i*N + j] += product; // add to the current row, column
             }
 } 
 
@@ -47,9 +48,9 @@ size_t get_calc_set(unsigned int rows[], size_t size) {
     int start_row;
     pthread_mutex_lock(&lock);
 
-    if( current_index < max_row ) { // there remain rows unchecked
-        start_row = current_index; // Start with current index
-        current_index += BATCH_SIZE;
+    if( current_row < max_row ) { // there remain rows unchecked
+        start_row = current_row; // Start with current index
+        current_row += BATCH_SIZE;
         pthread_mutex_unlock(&lock);
         // Get the requested batch size or as many as legal
         for (i = 0; i < size && start_row <= max_row; ++i) {
@@ -72,11 +73,14 @@ void *consume_and_calculate(void* arg) {
     unsigned int set[BATCH_SIZE];
     size_t actual_size = 0;
 
+    // while there are rows left to be processed
     while ((actual_size = get_calc_set(set, BATCH_SIZE)) > 0) {
         for (int i = 0; i < actual_size; ++i) {
             unsigned int curr_row = set[i];
             multiply(matrices, curr_row);
         }
+
+        // last batch has been completed
         if (actual_size < BATCH_SIZE)
             break;
     }
