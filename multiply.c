@@ -100,10 +100,11 @@ void mat_multiply(Mat *A, Mat *B, Mat *C, unsigned int threads){
     //after doing the multiplication.
     //example_helper_function(1000);
     N = A->n;
+    max_row = N;
     // Set m and n in Matrix C
     C->n = N;
     C->m = A->m;
-
+    //printf("Length: %d, Threads: %d\n", N);
     Matrices matrices = { .X = A, .Y = B, .Z = C };
 
     if (pthread_mutex_init(&lock, NULL) != 0)
